@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora</title>
+    <style>
+        /* Estilos CSS para a calculadora */
+        .calculator {
+            width: 300px;
+            margin: 0 auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        input[type="text"], input[type="button"] {
+            width: 50px;
+            height: 50px;
+            margin: 5px;
+            font-size: 20px;
+        }
+        /* Estilo personalizado para o botão "C" (apagar) */
+        .button-red {
+            background-color: red;
+            color: white;
+        }
+        /* Estilo personalizado para o botão "=" (igual) */
+        .button-green {
+            background-color: green;
+            color: white;
+        }
+        /* Estilo para o resultado */
+        #result {
+            width: 100%;
+            font-size: 24px; /* Aumentar o tamanho da fonte para o resultado */
+            text-align: right; /* Alinhar o texto à direita */
+            padding: 10px;
+            border: none; /* Remover a borda do campo de texto */
+            background-color: #f3f3f3; /* Cor de fundo do campo de texto */
+        }
+        /* Estilo para o emoji de dinheiro */
+        #money-emoji {
+            position: absolute;
+            font-size: 24px;
+            pointer-events: none; /* Evitar que o emoji afete interações do mouse */
+            transition: all 0.2s ease-in-out; /* Adicionar transição suave */
+        }
+        /* Estilo para o cursor do diabinho */
+        body.emoji-cursor {
+            cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAKklEQVR42mJQkAIAAAA//AXEAGFAAAP+4lOaAAAAASUVORK5CYII=') 10 10, auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <!-- Resultado com campo de visão maior -->
+        <input type="text" id="result" disabled>
+        <br>
+        <input type="button" value="1" onclick="addToDisplay('1')">
+        <input type="button" value="2" onclick="addToDisplay('2')">
+        <input type="button" value="3" onclick="addToDisplay('3')">
+        <input type="button" value="+" onclick="addToDisplay('+')">
+        <br>
+        <input type="button" value="4" onclick="addToDisplay('4')">
+        <input type="button" value="5" onclick="addToDisplay('5')">
+        <input type="button" value="6" onclick="addToDisplay('6')">
+        <input type="button" value="-" onclick="addToDisplay('-')">
+        <br>
+        <input type="button" value="7" onclick="addToDisplay('7')">
+        <input type="button" value="8" onclick="addToDisplay('8')">
+        <input type="button" value="9" onclick="addToDisplay('9')">
+        <input type="button" value="*" onclick="addToDisplay('*')">
+        <br>
+        <!-- Aplicando a classe .button-red ao botão "C" -->
+        <input type="button" value="C" onclick="clearDisplay()" class="button-red">
+        <input type="button" value="0" onclick="addToDisplay('0')">
+        <!-- Aplicando a classe .button-green ao botão "=" -->
+        <input type="button" value="=" onclick="calculate()" class="button-green">
+        <input type="button" value="/" onclick="addToDisplay('/')">
+        <input type="button" value="." onclick="addToDisplay('.')">
+    </div>
+
+    <!-- Div para o emoji de dinheiro -->
+    <div id="money-emoji">💰</div>
+
+    <script>
+        let moneyEmojiVisible = false;
+
+        // Função para adicionar números e operadores ao display
+        function addToDisplay(value) {
+            document.getElementById("result").value += value;
+        }
+
+        // Função para limpar o display
+        function clearDisplay() {
+            document.getElementById("result").value = "";
+        }
+
+        // Função para calcular a expressão no display
+        function calculate() {
+            try {
+                const expression = document.getElementById("result").value;
+                const result = eval(expression);
+                document.getElementById("result").value = result;
+
+                // Exibir emoji de dinheiro apenas quando o resultado for 1.000.000
+                if (result === 1000000) {
+                    showMoneyEmoji();
+                } else {
+                    hideMoneyEmoji();
+                }
+
+                // Mudar o cursor para o emoji 😈 quando o resultado for 666
+                if (result === 666) {
+                    document.body.classList.add("emoji-cursor");
+                } else {
+                    document.body.classList.remove("emoji-cursor");
+                }
+            } catch (error) {
+                document.getElementById("result").value = "Erro";
+            }
+        }
+
+        // Função para mostrar o emoji de dinheiro e fazê-lo seguir o cursor suavemente
+        function showMoneyEmoji() {
+            moneyEmojiVisible = true;
+            const moneyEmoji = document.getElementById("money-emoji");
+            moneyEmoji.style.display = "block";
+
+            // Adicionar evento para seguir o cursor do mouse
+            document.addEventListener("mousemove", moveMoneyEmoji);
+        }
+
+        // Função para esconder o emoji de dinheiro
+        function hideMoneyEmoji() {
+            moneyEmojiVisible = false;
+            const moneyEmoji = document.getElementById("money-emoji");
+            moneyEmoji.style.display = "none";
+
+            // Remover o evento para seguir o cursor do mouse
+            document.removeEventListener("mousemove", moveMoneyEmoji);
+        }
+
+        // Função para mover o emoji de dinheiro com o cursor do mouse de forma suave
+        function moveMoneyEmoji(event) {
+            if (moneyEmojiVisible) {
+                const moneyEmoji = document.getElementById("money-emoji");
+                const x = event ? event.clientX - moneyEmoji.clientWidth / 2 : window.innerWidth / 2;
+                const y = event ? event.clientY - moneyEmoji.clientHeight / 2 : window.innerHeight / 2;
+                moneyEmoji.style.left = x + "px";
+                moneyEmoji.style.top = y + "px";
+            }
+        }
+
+        // Adicionar evento de escuta para teclas do teclado
+        document.addEventListener("keydown", function(event) {
+            const key = event.key;
+            if (/^[0-9+\-*/.=C]$/.test(key)) {
+                if (key === "=" || key === "Enter") {
+                    calculate();
+                    event.preventDefault(); // Evitar o envio de formulário com a tecla Enter
+                } else if (key === "C" || key === "c") {
+                    clearDisplay();
+                } else {
+                    addToDisplay(key);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+<!-- Rodapé com a mensagem de direitos autorais -->
+<footer style="text-align: center; margin-top: 20px;">
+    COPYRIGHT 2023<br>
+    TODOS OS DIREITOS RESERVADOS.<br>
+    DESENVOLVIDO POR PEDRO HENRIQUE QUIRINO DINIZ
+</footer>
+
